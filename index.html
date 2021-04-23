@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es-cl">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <style>
+    @import url("https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap");
+    html {
+      box-sizing: border-box;
+      font-size: 18px;
+      font-family: "Roboto", sans-serif;
+    }
+    body {
+      background: #edf2f7;
+      color: #4a5568;
+      height: 100%;
+    }
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+    details {
+      font-size: 1rem;
+      margin: 1em auto;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      background: #fff;
+      border-radius: 8px;
+      position: relative;
+      width: 90vw;
+    }
+    details .summary-title {
+      user-select: none;
+    }
+    details:hover {
+      cursor: pointer;
+    }
+    details .summary-content {
+      border-top: 1px solid #e2e8f0;
+      cursor: default;
+      padding: 1em;
+      font-weight: 300;
+      line-height: 1.5;
+    }
+    details summary {
+      list-style: none;
+      padding: 1em;
+      display: flex;
+      justify-content: space-between;
+    }
+    details summary:focus {
+      outline: none;
+    }
+    details summary:hover .summary-chevron-up svg {
+      opacity: 1;
+    }
+    details .summary-chevron-up svg {
+      opacity: 0.5;
+    }
+    details .summary-chevron-up, details .summary-chevron-down {
+      pointer-events: none;
+      position: absolute;
+      top: 0.75em;
+      right: 1em;
+      background: #fff;
+    }
+    details .summary-chevron-up svg, details .summary-chevron-down svg {
+      display: block;
+    }
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .pinFecha {
+      background: #999999;
+      color: white;
+      border-radius: 25px;
+      padding: 4px 8px 4px 8px;
+      margin-right: 2em;
+    }
+
+    input {
+      border: transparent;
+      border-bottom: solid #006064 1px;
+      background: transparent;
+  }
+   
+  </style>
+  <title>Vue Reader</title>
+</head>
+<body>
+
+  <main id="app">
+
+    <label for="inputBuscar">Buscar</label>
+    <input v-model="inputBuscar" @input="buscarCliente" type="search" name="inputBuscar" id="inputBuscar">
+    <br><br> {{ indicador }} <br>
+    <details v-for="encontrado in encontrados">
+      <summary>
+        <span class="summary-title">{{ encontrado.NOMBRE }}</span>
+        <span class="pinFecha">{{ encontrado['FECHA INGRESO'] }}</span>
+        <div class="summary-chevron-up">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+      </summary>
+      Datos del cliente,
+      nombre,
+      etc.
+      etc.
+    </details>
+
+    <div>
+      <br>
+      Clientes de prueba disponibles: <br>
+      (Leidos directamente desde el archivo "clientes.json")
+      <ol>
+        <li v-for="cliente in clientes">{{ cliente.NOMBRE }}</li>
+      </ol>
+    </div>
+  </main>
+  
+  <script src="assets/js/vue.min.js"></script>
+
+  <script>
+    var app = new Vue({ 
+      el:'#app',
+      data: {
+        json_url: "assets/js/clientes.json",
+        clientes: [],
+        inputBuscar: "",
+        encontrados: []
+      },
+      mounted() {
+        this.leerJson();
+      },
+      methods: {
+        leerJson: function () {
+          fetch(this.json_url)
+            .then(response => {
+              return response.json();
+            })
+            .then(data => {
+              this.clientes = data;
+            })
+            .catch(function (error) {
+              console.log('Error con la petición', error);
+          });
+        },
+        buscarCliente: function () {
+          let encontrados = [];
+          let cliente_buscado = this.inputBuscar.trim().toUpperCase();
+          let busqueda = this.clientes.filter(val => val.NOMBRE.toUpperCase().includes(cliente_buscado));
+          
+          if (cliente_buscado.length < 3) {
+            this.encontrados = [];
+            return [];
+          }
+
+          busqueda.forEach((item) => encontrados.push(item));
+          this.encontrados = encontrados.reverse();
+        }
+      },
+      computed: {
+        indicador() {
+          if (!this.encontrados.length) return "Nada aun...";
+          return this.encontrados.length + " Datos encontrados";
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
